@@ -84,6 +84,14 @@ Opus 4.8, Sonnet 4.6, and Haiku 4.5; add more `id` entries as needed.
 
 ## Notes
 
+- **User-Agent override (required today).** The PWM edge (Cloudflare) blocks
+  the Anthropic SDK's default `User-Agent: Anthropic/JS …` with
+  `403 Your request was blocked`. OpenClaw uses that SDK, so the config sets
+  `headers: { "User-Agent": "openclaw-pwm/1.0" }` to get through. This is a
+  client-side workaround — the proper fix is server-side: allowlist the
+  `/api/v1/exchange/*` path in the Cloudflare WAF (or exempt `Anthropic/*`
+  UAs) so the official SDKs work unmodified. Once that's done the header can be
+  dropped.
 - **Beta headers.** OpenClaw skips some provider-specific features on proxy
   routes. If you need Anthropic beta features (1M context, fast mode), set
   `models.providers.pwm.headers["anthropic-beta"]` in `openclaw.json`.

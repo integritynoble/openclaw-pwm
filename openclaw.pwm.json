@@ -9,6 +9,11 @@
         baseUrl: "https://physicsworldmodel.org/api/v1/exchange/anthropic",
         apiKey: "${PWM_API_KEY}",
         api: "anthropic-messages",
+        // The PWM edge WAF (Cloudflare) blocks the Anthropic SDK's default
+        // "Anthropic/JS" User-Agent with 403 "Your request was blocked".
+        // Overriding the UA avoids the block. (Remove once the WAF allowlists
+        // the /api/v1/exchange path — see README.)
+        headers: { "User-Agent": "openclaw-pwm/1.0" },
         models: [
           { id: "claude-opus-4-8",   name: "Claude Opus 4.8 (PWM)",   contextWindow: 1000000, maxTokens: 128000 },
           { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6 (PWM)", contextWindow: 1000000, maxTokens: 128000 },

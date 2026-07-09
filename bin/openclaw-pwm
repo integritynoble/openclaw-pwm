@@ -7,8 +7,11 @@
 set -euo pipefail
 
 EXCHANGE_URL="${PWM_EXCHANGE_URL:-https://physicsworldmodel.org/api/v1/exchange/anthropic}"
-CONFIG_DIR="${OPENCLAW_PWM_CONFIG_DIR:-$HOME/.config/openclaw}"
-CONFIG_FILE="$CONFIG_DIR/openclaw.json"
+# OpenClaw reads ~/.openclaw/openclaw.json by default, overridable via
+# OPENCLAW_CONFIG_PATH (a full file path). Honor that so we write where
+# OpenClaw actually looks.
+CONFIG_FILE="${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
+CONFIG_DIR="$(dirname "$CONFIG_FILE")"
 
 die() { printf 'openclaw-pwm: %s\n' "$1" >&2; exit 1; }
 
@@ -47,10 +50,37 @@ Then re-run openclaw-pwm.
 EOF
   exit 1
 else
-  # Fresh install: drop the bundled template in place.
-  TEMPLATE="$(cd "$(dirname "$0")/.." && pwd)/openclaw.pwm.json"
-  [ -f "$TEMPLATE" ] || die "bundled template not found at $TEMPLATE"
-  cp "$TEMPLATE" "$CONFIG_FILE"
+  # Fresh install: write the PWM provider config (embedded so the launcher is
+  # self-contained and does not depend on repo layout after installation).
+  cat > "$CONFIG_FILE" <<EOF
+{
+  // PWM provider for OpenClaw — routes Claude models through the PWM token exchange.
+  // "merge" mode augments (does not replace) your existing OpenClaw config.
+  models: {
+    mode: "merge",
+    providers: {
+      pwm: {
+        baseUrl: "$EXCHANGE_URL",
+        apiKey: "\${PWM_API_KEY}",
+        api: "anthropic-messages",
+        // The PWM edge WAF blocks the Anthropic SDK's default "Anthropic/JS"
+        // User-Agent. Override it so requests are not 403'd.
+        headers: { "User-Agent": "openclaw-pwm/1.0" },
+        models: [
+          { id: "claude-opus-4-8",   name: "Claude Opus 4.8 (PWM)",   contextWindow: 1000000, maxTokens: 128000 },
+          { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6 (PWM)", contextWindow: 1000000, maxTokens: 128000 },
+          { id: "claude-haiku-4-5",  name: "Claude Haiku 4.5 (PWM)",  contextWindow: 200000,  maxTokens: 64000 }
+        ]
+      }
+    }
+  },
+  agents: {
+    defaults: {
+      model: { primary: "pwm/claude-opus-4-8" }
+    }
+  }
+}
+EOF
   printf 'openclaw-pwm: wrote PWM provider config to %s\n' "$CONFIG_FILE" >&2
 fi
 
