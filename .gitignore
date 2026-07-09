@@ -1,0 +1,11 @@
+# Local env / secrets
+.env
+*.local
+
+# Editor / OS
+.DS_Store
+*.swp
+
+# OpenClaw runtime state (should never be committed)
+openclaw.json
+.openclaw/

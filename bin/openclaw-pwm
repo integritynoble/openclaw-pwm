@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# openclaw-pwm — launch OpenClaw routed through the PWM token exchange.
+#
+# OpenClaw natively supports custom providers via openclaw.json (merge mode),
+# so no source patches are needed — this launcher just injects the PWM provider
+# config and your PWM key, then delegates to the real `openclaw`.
+set -euo pipefail
+
+EXCHANGE_URL="${PWM_EXCHANGE_URL:-https://physicsworldmodel.org/api/v1/exchange/anthropic}"
+CONFIG_DIR="${OPENCLAW_PWM_CONFIG_DIR:-$HOME/.config/openclaw}"
+CONFIG_FILE="$CONFIG_DIR/openclaw.json"
+
+die() { printf 'openclaw-pwm: %s\n' "$1" >&2; exit 1; }
+
+# 1. Require a PWM key.
+if [ -z "${PWM_API_KEY:-}" ]; then
+  cat >&2 <<'EOF'
+openclaw-pwm: PWM_API_KEY is not set.
+
+Get a key at https://token.comparegpt.io (Token Portal) or from your PWM
+account, then:
+
+  export PWM_API_KEY=sk-pwm-your_key_here
+  openclaw-pwm
+
+EOF
+  exit 1
+fi
+
+# 2. Require openclaw on PATH.
+if ! command -v openclaw >/dev/null 2>&1; then
+  die "the 'openclaw' CLI was not found on PATH. Install it first, e.g.: npm install -g openclaw"
+fi
+
+# 3. Install the PWM provider config on first run (merge mode → safe to keep
+#    alongside a user's own openclaw.json). We never overwrite an existing file
+#    that already defines the pwm provider.
+mkdir -p "$CONFIG_DIR"
+if [ -f "$CONFIG_FILE" ] && grep -q '"pwm"\|pwm:' "$CONFIG_FILE" 2>/dev/null; then
+  : # pwm provider already present — leave the user's config untouched
+elif [ -f "$CONFIG_FILE" ]; then
+  cat >&2 <<EOF
+openclaw-pwm: $CONFIG_FILE already exists but has no 'pwm' provider.
+Add the provider block from the bundled template so your config is not clobbered:
+  $(dirname "$0")/../openclaw.pwm.json
+Then re-run openclaw-pwm.
+EOF
+  exit 1
+else
+  # Fresh install: drop the bundled template in place.
+  TEMPLATE="$(cd "$(dirname "$0")/.." && pwd)/openclaw.pwm.json"
+  [ -f "$TEMPLATE" ] || die "bundled template not found at $TEMPLATE"
+  cp "$TEMPLATE" "$CONFIG_FILE"
+  printf 'openclaw-pwm: wrote PWM provider config to %s\n' "$CONFIG_FILE" >&2
+fi
+
+# Allow overriding the exchange endpoint (e.g. test.physicsworldmodel.org) without
+# editing the file: substitute the baseUrl at launch if PWM_EXCHANGE_URL is set.
+export PWM_API_KEY
+[ "$EXCHANGE_URL" != "https://physicsworldmodel.org/api/v1/exchange/anthropic" ] && \
+  printf 'openclaw-pwm: using exchange %s (edit %s to persist)\n' "$EXCHANGE_URL" "$CONFIG_FILE" >&2
+
+# 4. Delegate to the real openclaw, forwarding all args.
+exec openclaw "$@"
