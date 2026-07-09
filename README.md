@@ -23,14 +23,22 @@ OpenClaw  ──anthropic-messages──▶  https://physicsworldmodel.org/api/v
 ## Install
 
 ```bash
-# 1. Install OpenClaw itself
-npm install -g openclaw
-
-# 2. Install this launcher
-./install.sh              # installs to /usr/local/bin (pass a dir to change)
+npm install -g openclaw openclaw-pwm
 ```
 
-On Windows, put `bin/openclaw-pwm.cmd` on your PATH (it copies the same config).
+That installs the OpenClaw agent and this wrapper (cross-platform: macOS, Linux,
+Windows). `openclaw-pwm` becomes a command on your PATH.
+
+<details>
+<summary>Alternative: install from source (no npm)</summary>
+
+```bash
+npm install -g openclaw     # still required
+./install.sh                # installs the bash launcher to /usr/local/bin
+```
+
+On Windows, put `bin/openclaw-pwm.cmd` on your PATH.
+</details>
 
 ## Use
 

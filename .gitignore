@@ -9,3 +9,7 @@
 # OpenClaw runtime state (should never be committed)
 openclaw.json
 .openclaw/
+
+# npm
+node_modules/
+*.tgz

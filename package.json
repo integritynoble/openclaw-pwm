@@ -1,0 +1,35 @@
+{
+  "name": "openclaw-pwm",
+  "version": "1.0.0",
+  "description": "OpenClaw coding agent powered by PWM tokens — routes Claude models through the PWM exchange via a custom provider.",
+  "bin": {
+    "openclaw-pwm": "bin/cli.js"
+  },
+  "files": [
+    "bin/cli.js",
+    "openclaw.pwm.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "openclaw",
+    "pwm",
+    "claude",
+    "anthropic",
+    "llm",
+    "coding-agent",
+    "physics-world-model"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/integritynoble/openclaw-pwm.git"
+  },
+  "homepage": "https://github.com/integritynoble/openclaw-pwm#readme",
+  "bugs": {
+    "url": "https://github.com/integritynoble/openclaw-pwm/issues"
+  },
+  "author": "integritynoble",
+  "license": "MIT"
+}
