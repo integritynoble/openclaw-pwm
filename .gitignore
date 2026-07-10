@@ -13,3 +13,4 @@ openclaw.json
 # npm
 node_modules/
 *.tgz
+.npmrc

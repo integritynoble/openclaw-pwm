@@ -48,16 +48,10 @@ openclaw-pwm                                # any openclaw args are forwarded
 ```
 
 On first run the launcher writes the PWM provider to
-`~/.config/openclaw/openclaw.json` (merge mode — it augments, never replaces,
+`~/.openclaw/openclaw.json` (merge mode — it augments, never replaces,
 your own OpenClaw config). If that file already exists without a `pwm` provider,
 the launcher tells you to add the block from `openclaw.pwm.json` yourself so your
 config is not clobbered.
-
-### Point at the dev/test exchange
-
-```bash
-export PWM_EXCHANGE_URL=https://test.physicsworldmodel.org/api/v1/exchange/anthropic
-```
 
 ## Manual setup (no launcher)
 
