@@ -1,6 +1,6 @@
 {
   "name": "openclaw-pwm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenClaw coding agent powered by PWM tokens — routes Claude models through the PWM exchange via a custom provider.",
   "bin": {
     "openclaw-pwm": "bin/cli.js"
